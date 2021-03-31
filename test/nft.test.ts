@@ -6,28 +6,51 @@ import type { AccountContract, Collectible } from '../src';
 const TEST_BENEFICIARY = 'corgis-nft.testnet'; // todo: remove corgis from here
 
 describe('Nft contract', () => {
+  const testContractsAmount = 3;
+  let contracts: AccountContract[];
+
   let jen: AccountContract;
   let bob: AccountContract;
   let ted: AccountContract;
 
   beforeAll(async () => {
-    [jen, bob, ted] = await Promise.all([
-      initContractWithNewTestAccount(),
-      initContractWithNewTestAccount(),
-      initContractWithNewTestAccount(),
-    ]);
+    contracts = await Promise.all(
+      new Array(testContractsAmount).fill(0).map(initContractWithNewTestAccount),
+    );
+
+    [jen, bob, ted] = contracts;
   });
 
   afterAll(async () => {
-    await Promise.all([
-      jen.account.deleteAccount(TEST_BENEFICIARY),
-      bob.account.deleteAccount(TEST_BENEFICIARY),
-      ted.account.deleteAccount(TEST_BENEFICIARY),
-    ]);
+    await Promise.all(contracts.map(({ account }) => account.deleteAccount(TEST_BENEFICIARY)));
   });
 
-  test('that test accounts are different', async () => {
-    expect(jen.accountId).not.toBe(bob.accountId);
+  describe('Initial state', () => {
+    test('that test accounts are different', async () => {
+      const accountIds = contracts.map(({ accountId }) => accountId);
+
+      expect(new Set(accountIds).size).toBe(testContractsAmount);
+    });
+
+    test('that no collectibles has been created', async () => {
+      const collectibles = await Promise.all(
+        contracts.map(
+          ({ contract, accountId }) => contract.get_collectibles_by_creator({ creator_id: accountId }),
+        ),
+      );
+
+      expect(collectibles.flat()).toHaveLength(0);
+    });
+
+    test('that no tokens has been claimed', async () => {
+      const tokens = await Promise.all(
+        contracts.map(
+          ({ contract, accountId }) => contract.get_tokens_by_owner({ owner_id: accountId }),
+        ),
+      );
+
+      expect(tokens.flat()).toHaveLength(0);
+    });
   });
 
   describe('create_collectible', () => {
@@ -65,7 +88,7 @@ describe('Nft contract', () => {
       const gateId = uuidv4();
 
       await addTestCollectible(jen.contract, { gate_id: gateId });
-      const collectible = await jen.contract.get_collectible_by_gate_id({ gate_id: gateId });
+      const collectible = await ted.contract.get_collectible_by_gate_id({ gate_id: gateId });
 
       expect(collectible).toMatchObject({ gate_id: gateId });
     });
