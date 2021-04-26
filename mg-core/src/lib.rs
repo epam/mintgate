@@ -422,5 +422,11 @@ pub trait NonFungibleTokenApprovalsReceiver {
         msg: String,
     );
 
+    fn batch_on_approve(
+        &mut self,
+        tokens: Vec<(TokenId, MarketApproveMsg)>,
+        owner_id: ValidAccountId,
+    );
+
     fn nft_on_revoke(&mut self, token_id: TokenId);
 }

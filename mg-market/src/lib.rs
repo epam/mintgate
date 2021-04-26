@@ -304,6 +304,14 @@ impl NonFungibleTokenApprovalsReceiver for MarketContract {
             Panics::TokenKeyNotFound { token_key }.panic();
         }
     }
+
+    fn batch_on_approve(
+        &mut self,
+        _tokens: Vec<(TokenId, MarketApproveMsg)>,
+        _owner_id: ValidAccountId,
+    ) {
+        // todo!()
+    }
 }
 
 fn insert_token_id_to<T: BorshSerialize + BorshDeserialize, F: FnOnce(CryptoHash) -> Keys>(
