@@ -31,7 +31,7 @@ use near_sdk::{
     env, ext_contract,
     json_types::{ValidAccountId, U128, U64},
     log, near_bindgen,
-    serde::Serialize,
+    serde::{Deserialize, Serialize},
     serde_json, setup_alloc, AccountId, Balance, BorshStorageKey, CryptoHash, Gas, PanicOnDefault,
     Promise, PromiseResult,
 };
@@ -79,7 +79,7 @@ enum Keys {
     TokensByOwnerValue { owner_id_hash: CryptoHash },
 }
 
-#[derive(Serialize, PanicMessage)]
+#[derive(Serialize, Deserialize, PanicMessage)]
 #[serde(crate = "near_sdk::serde", tag = "err")]
 pub enum Panic {
     #[panic_msg = "Min royalty `{}` must be less or equal to max royalty `{}`"]
@@ -124,13 +124,13 @@ pub enum Panic {
     Errors { panics: Panics },
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
-pub struct Panics(Vec<Panic>);
+pub struct Panics(pub Vec<(TokenId, Panic)>);
 
 impl Display for Panics {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "{}", self.0.len())
+        write!(f, "{}", self.0.len())
     }
 }
 
@@ -667,6 +667,8 @@ impl NonFungibleTokenApprovalMgmt for NftContract {
 const GAS_FOR_ROYALTIES: Gas = 120_000_000_000_000;
 const NO_DEPOSIT: Balance = 0;
 
+#[near_log(skip_args, only_pub)]
+#[near_bindgen]
 impl NftContract {
     pub fn batch_approve(
         &mut self,
@@ -686,8 +688,9 @@ impl NftContract {
             oks,
             owner_id.try_into().unwrap(),
             account_id.as_ref(),
-            0,
-            env::prepaid_gas() / 2,
+            NO_DEPOSIT,
+            // env::prepaid_gas() / 2,
+            GAS_FOR_ROYALTIES,
         )
         .then(self_callback::resolve_batch_approve(
             errs,
@@ -732,7 +735,7 @@ impl NftContract {
 #[near_ext]
 #[ext_contract(self_callback)]
 trait SelfCallback {
-    fn resolve_batch_approve(&mut self, tokens: Vec<(TokenId, Panic)>);
+    fn resolve_batch_approve(&mut self, errs: Vec<(TokenId, Panic)>);
 }
 
 #[near_log(skip_args, only_pub)]
@@ -745,8 +748,7 @@ impl SelfCallback for NftContract {
             PromiseResult::Failed => unreachable!(),
             PromiseResult::Successful(_) => {
                 if !errs.is_empty() {
-                    Panic::Errors { panics: Panics(errs.into_iter().map(|(_, p)| p).collect()) }
-                        .panic()
+                    Panic::Errors { panics: Panics(errs) }.panic()
                 }
             }
         }
