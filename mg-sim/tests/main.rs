@@ -1,4 +1,4 @@
-use mg_core::{mocked_context::gate_id, MarketApproveMsg, ValidGateId};
+use mg_core::{mocked_context::gate_id, MarketApproveMsg, TokenId, ValidGateId};
 use mg_nft::Panic;
 use near_sdk::{
     json_types::{ValidAccountId, U128},
@@ -96,11 +96,17 @@ fn nft_approve_and_revoke_tokens() {
     }
 
     for token_id in &tokens {
+        let tokens = get_tokens_for_sale(&markets[0]);
+        assert!(tokens.iter().map(|t| t.token_id).collect::<Vec<TokenId>>().contains(token_id));
+
         if token_id.0 % 2 == 0 {
             nft_revoke(nft, &markets[0], alice, *token_id).unwrap();
         } else {
             burn_token(nft, alice, *token_id).unwrap();
         }
+
+        let tokens = get_tokens_for_sale(&markets[0]);
+        assert!(!tokens.iter().map(|t| t.token_id).collect::<Vec<TokenId>>().contains(token_id));
     }
 
     let token_id = claim_token(nft, alice, 1).unwrap();
