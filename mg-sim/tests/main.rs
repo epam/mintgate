@@ -1,7 +1,7 @@
 use mg_core::{mocked_context::gate_id, MarketApproveMsg, TokenId, ValidGateId};
 use mg_nft::Panic;
 use near_sdk::{
-    json_types::{ValidAccountId, U128},
+    json_types::{ValidAccountId, U128, U64},
     serde_json,
 };
 use near_sdk_sim::to_yocto;
@@ -145,6 +145,7 @@ fn batch_approve_a_few_tokens() {
 
     batch_approve(nft, &markets[0], alice, tokens.clone()).unwrap();
 
+    tokens.push((U64(1_111_111_111), U128(1)));
     batch_approve(nft, &markets[0], bob, tokens.clone()).failure(format!(
         "{} error(s) detected, see `panics` fields for a full list of errors",
         tokens.len()

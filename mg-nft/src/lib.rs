@@ -740,7 +740,11 @@ impl NftContract {
         account_id: AccountId,
         min_price: U128,
     ) -> Result<MarketApproveMsg, Panic> {
-        let mut token = self.get_token(token_id);
+        let mut token = match self.tokens.get(&token_id) {
+            None => return Err(Panic::TokenIdNotFound { token_id }),
+            Some(token) => token,
+        };
+
         if owner_id != &token.owner_id {
             return Err(Panic::TokenIdNotOwnedBy { token_id, owner_id: owner_id.clone() });
         }
