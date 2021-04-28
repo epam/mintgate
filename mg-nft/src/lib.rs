@@ -20,9 +20,15 @@
 #![deny(warnings)]
 
 use mg_core::{
-    crypto_hash, Collectible, ContractMetadata, Fraction, GateId, MarketApproveMsg, NftApproveMsg,
-    NonFungibleTokenApprovalMgmt, NonFungibleTokenCore, Payout, Token, TokenApproval, TokenId,
-    TokenMetadata, ValidGateId,
+    crypto_hash,
+    fraction::Fraction,
+    gate::{GateId, ValidGateId},
+    nep171::NonFungibleTokenCore,
+    nep177::{NFTContractMetadata, NonFungibleTokenMetadata},
+    nep178::NonFungibleTokenApprovalMgmt,
+    nep181::NonFungibleTokenEnumeration,
+    Collectible, MarketApproveMsg, NftApproveMsg, Payout, Token, TokenApproval, TokenId,
+    TokenMetadata,
 };
 use near_env::{near_ext, near_log, PanicMessage};
 use near_sdk::{
@@ -53,7 +59,7 @@ pub struct NftContract {
     /// Admin account is only account allowed to make certain calls.
     admin_id: AccountId,
     /// Metadata describing this NFT contract
-    metadata: ContractMetadata,
+    metadata: NFTContractMetadata,
     /// Indicates the minimum allowed `royalty` to be set on a `Collectible` when an Artist creates it.
     min_royalty: Fraction,
     /// Indicates the minimum allowed `royalty` to be set on a `Collectible` when an Artist creates it.
@@ -150,7 +156,7 @@ impl NftContract {
     #[init]
     pub fn init(
         admin_id: ValidAccountId,
-        metadata: ContractMetadata,
+        metadata: NFTContractMetadata,
         min_royalty: Fraction,
         max_royalty: Fraction,
         mintgate_fee: Fraction,
@@ -485,11 +491,6 @@ impl NftContract {
 #[near_log(skip_args, only_pub)]
 #[near_bindgen]
 impl NonFungibleTokenCore for NftContract {
-    /// Returns the NFT metadata for this contract.
-    fn nft_metadata(&self) -> ContractMetadata {
-        self.metadata.clone()
-    }
-
     /// Transfer the token `token_id` to the `receiver_id` account.
     ///
     /// See <https://github.com/epam/mintgate/issues/18>.
@@ -592,17 +593,21 @@ impl NonFungibleTokenCore for NftContract {
         payout
     }
 
-    /// Returns the total token supply.
-    fn nft_total_supply(&self) -> U64 {
-        U64::from(self.tokens.len())
-    }
-
     /// Returns the token identified by `token_id`.
     /// Or `null` if the `token_id` was not found.
     ///
     /// See <https://github.com/epam/mintgate/issues/17>.
     fn nft_token(&self, token_id: TokenId) -> Option<Token> {
         self.tokens.get(&token_id)
+    }
+}
+
+#[near_log(skip_args, only_pub)]
+#[near_bindgen]
+impl NonFungibleTokenMetadata for NftContract {
+    /// Returns the NFT metadata for this contract.
+    fn nft_metadata(&self) -> NFTContractMetadata {
+        self.metadata.clone()
     }
 }
 
@@ -694,6 +699,66 @@ impl NonFungibleTokenApprovalMgmt for NftContract {
 
         token.approvals.clear();
         self.tokens.insert(&token_id, &token);
+    }
+}
+
+#[near_log(skip_args, only_pub)]
+#[near_bindgen]
+impl NonFungibleTokenEnumeration for NftContract {
+    /// Returns the total token supply.
+    fn nft_total_supply(&self) -> U64 {
+        U64::from(self.tokens.len())
+    }
+
+    fn nft_tokens(&self, from_index: Option<U64>, limit: Option<u32>) -> Vec<Token> {
+        let mut i = from_index.map_or(0, |s| s.0);
+        let mut result = Vec::new();
+        while result.len() < limit.unwrap_or(u32::MAX) as usize {
+            if let Some(token) = self.tokens.values_as_vector().get(i) {
+                result.push(token);
+                i += 1
+            } else {
+                break;
+            }
+        }
+
+        result
+    }
+
+    fn nft_supply_for_owner(&self, account_id: ValidAccountId) -> U64 {
+        match self.tokens_by_owner.get(account_id.as_ref()) {
+            None => 0.into(),
+            Some(list) => list.len().into(),
+        }
+    }
+
+    fn nft_tokens_for_owner(
+        &self,
+        account_id: ValidAccountId,
+        from_index: Option<U64>,
+        limit: Option<u32>,
+    ) -> Vec<Token> {
+        match self.tokens_by_owner.get(account_id.as_ref()) {
+            None => Vec::new(),
+            Some(list) => {
+                let mut i = from_index.map_or(0, |s| s.0);
+                let mut result = Vec::new();
+                while result.len() < limit.unwrap_or(u32::MAX) as usize {
+                    if let Some(token_id) = list.as_vector().get(i) {
+                        let token = self.tokens.get(&token_id).expect("Token not found");
+                        assert!(token.token_id == token_id);
+                        assert!(&token.owner_id == account_id.as_ref());
+                        result.push(token);
+
+                        i += 1
+                    } else {
+                        break;
+                    }
+                }
+
+                result
+            }
+        }
     }
 }
 

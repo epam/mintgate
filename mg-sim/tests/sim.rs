@@ -4,7 +4,9 @@ near_sdk_sim::lazy_static_include::lazy_static_include_bytes! {
 }
 
 use ansi_term::{Colour, Style};
-use mg_core::{mocked_context::gate_id, Collectible, NftApproveMsg, Token, TokenId, ValidGateId};
+use mg_core::{
+    gate::ValidGateId, mocked_context::gate_id, Collectible, NftApproveMsg, Token, TokenId,
+};
 use mg_market::TokenForSale;
 use near_sdk::{
     json_types::{ValidAccountId, U128, U64},
@@ -119,8 +121,8 @@ pub fn init(n: usize, min_royalty: &str, max_royalty: &str, mintgate_fee: &str) 
     Sim { root, nft, markets, fake_market, mids, mintgate, admin, alice, bob, charlie }
 }
 
-fn metadata() -> mg_core::ContractMetadata {
-    mg_core::ContractMetadata {
+fn metadata() -> mg_core::nep177::NFTContractMetadata {
+    mg_core::nep177::NFTContractMetadata {
         spec: "mg-nft-1.0.0".to_string(),
         name: "MintGate App".to_string(),
         symbol: "MG".to_string(),

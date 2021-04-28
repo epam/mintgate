@@ -1,4 +1,4 @@
-use mg_core::{mocked_context::gate_id, MarketApproveMsg, TokenId, ValidGateId};
+use mg_core::{gate::ValidGateId, mocked_context::gate_id, MarketApproveMsg, TokenId};
 use mg_nft::Panic;
 use near_sdk::{
     json_types::{ValidAccountId, U128, U64},

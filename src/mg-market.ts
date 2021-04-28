@@ -1,4 +1,4 @@
-// TypeScript bindings generated with near-ts v0.2.11 https://github.com/epam/near-syn
+// TypeScript bindings generated with near-ts v0.2.14 https://github.com/epam/near-syn
 
 // Exports common NEAR Rust SDK types
 export type U64 = string;
@@ -11,8 +11,14 @@ export type ValidAccountId = string;
 /**
  */
 export enum CorePanics {
+    /**
+     */
     ZeroDenominatorFraction,
+
+    /**
+     */
     FractionGreaterThanOne,
+
 }
 
 /**
@@ -51,7 +57,7 @@ export type GateId = string;
  *  ## Examples
  * 
  *  ```
- *  use mg_core::ValidGateId;
+ *  use mg_core::gate::ValidGateId;
  *  use std::convert::TryFrom;
  * 
  *  assert!(ValidGateId::try_from("TGWN_P5W6QNX").is_ok());
@@ -69,7 +75,7 @@ export type GateId = string;
  *  ## Usage
  * 
  *  ```
- *  use mg_core::ValidGateId;
+ *  use mg_core::gate::ValidGateId;
  *  use near_sdk::serde_json;
  *  use std::convert::TryInto;
  *  use std::convert::TryFrom;
@@ -113,96 +119,6 @@ export type Timestamp = number;
  *  The balance indicates the amount a Marketplace contract should pay when a Token is being sold.
  */
 export type Payout = Record<AccountId, U128>;
-
-/**
- *  Associated metadata for the NFT contract as defined by
- *  https://github.com/near/NEPs/discussions/177
- */
-export interface ContractMetadata {
-    /**
-     */
-    spec: string;
-
-    /**
-     */
-    name: string;
-
-    /**
-     */
-    symbol: string;
-
-    /**
-     */
-    icon: string|null;
-
-    /**
-     */
-    base_uri: string|null;
-
-    /**
-     */
-    reference: string|null;
-
-    /**
-     */
-    reference_hash: string|null;
-
-}
-
-/**
- *  Associated metadata with a `GateId` as defined by
- *  https://github.com/near/NEPs/discussions/177
- */
-export interface TokenMetadata {
-    /**
-     */
-    title: string|null;
-
-    /**
-     */
-    description: string|null;
-
-    /**
-     */
-    media: string|null;
-
-    /**
-     */
-    media_hash: string|null;
-
-    /**
-     */
-    copies: U64|null;
-
-    /**
-     */
-    issued_at: Timestamp|null;
-
-    /**
-     */
-    expires_at: Timestamp|null;
-
-    /**
-     */
-    starts_at: Timestamp|null;
-
-    /**
-     */
-    updated_at: Timestamp|null;
-
-    /**
-     */
-    extra: string|null;
-
-    /**
-     */
-    reference: string|null;
-
-    /**
-     */
-    reference_hash: string|null;
-
-}
 
 /**
  */
@@ -288,6 +204,61 @@ export interface Token {
 }
 
 /**
+ *  Associated metadata with a `GateId` as defined by
+ *  https://github.com/near/NEPs/discussions/177
+ */
+export interface TokenMetadata {
+    /**
+     */
+    title: string|null;
+
+    /**
+     */
+    description: string|null;
+
+    /**
+     */
+    media: string|null;
+
+    /**
+     */
+    media_hash: string|null;
+
+    /**
+     */
+    copies: U64|null;
+
+    /**
+     */
+    issued_at: Timestamp|null;
+
+    /**
+     */
+    expires_at: Timestamp|null;
+
+    /**
+     */
+    starts_at: Timestamp|null;
+
+    /**
+     */
+    updated_at: Timestamp|null;
+
+    /**
+     */
+    extra: string|null;
+
+    /**
+     */
+    reference: string|null;
+
+    /**
+     */
+    reference_hash: string|null;
+
+}
+
+/**
  *  Represents an individual approval by some marketplace account id.
  */
 export interface TokenApproval {
@@ -300,6 +271,42 @@ export interface TokenApproval {
      *  Minimum price a token should be sell for.
      */
     min_price: U128;
+
+}
+
+/**
+ *  Associated metadata for the NFT contract as defined by
+ *  https://github.com/near/NEPs/discussions/177
+ *  https://nomicon.io/Standards/NonFungibleToken/Metadata.html#interface
+ */
+export interface NFTContractMetadata {
+    /**
+     */
+    spec: string;
+
+    /**
+     */
+    name: string;
+
+    /**
+     */
+    symbol: string;
+
+    /**
+     */
+    icon: string|null;
+
+    /**
+     */
+    base_uri: string|null;
+
+    /**
+     */
+    reference: string|null;
+
+    /**
+     */
+    reference_hash: string|null;
 
 }
 
@@ -384,10 +391,22 @@ export interface TokenForSale {
 /**
  */
 export enum Panics {
+    /**
+     */
     MsgFormatMinPriceMissing,
+
+    /**
+     */
     TokenKeyNotFound,
+
+    /**
+     */
     BuyOwnTokenNotAllowed,
+
+    /**
+     */
     NotEnoughDepositToBuyToken,
+
 }
 
 /**

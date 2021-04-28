@@ -1,9 +1,10 @@
 #![deny(warnings)]
 
 use mg_core::{
+    gate::ValidGateId,
     mock_context,
     mocked_context::{alice, any, bob, charlie, gate_id, nft},
-    MarketApproveMsg, NonFungibleTokenApprovalsReceiver, TokenId, ValidGateId,
+    MarketApproveMsg, NonFungibleTokenApprovalsReceiver, TokenId,
 };
 use mg_market::{MarketContract, TokenForSale};
 use near_sdk::{

@@ -1,12 +1,16 @@
 #![deny(warnings)]
 
 use mg_core::{
+    gate::{GateId, ValidGateId},
     mock_context,
     mocked_context::{
         alice, any, bob, charlie, gate_id, market, mintgate_admin, mintgate_fee_account_id,
     },
-    ContractMetadata, GateId, NftApproveMsg, NonFungibleTokenApprovalMgmt, NonFungibleTokenCore,
-    TokenApproval, TokenId, ValidGateId,
+    nep171::NonFungibleTokenCore,
+    nep177::NFTContractMetadata,
+    nep177::NonFungibleTokenMetadata,
+    nep178::NonFungibleTokenApprovalMgmt,
+    NftApproveMsg, TokenApproval, TokenId,
 };
 use mg_nft::NftContract;
 use near_sdk::{
@@ -127,8 +131,8 @@ fn init() -> MockedContext<NftContractChecker> {
     init_contract("5/100", "30/100")
 }
 
-fn metadata() -> ContractMetadata {
-    ContractMetadata {
+fn metadata() -> NFTContractMetadata {
+    NFTContractMetadata {
         spec: "mg-nft-1.0.0".to_string(),
         name: "MintGate App".to_string(),
         symbol: "MG".to_string(),
