@@ -109,7 +109,7 @@ pub fn market() -> ValidAccountId {
 
 pub fn gate_id(n: u16) -> ValidGateId {
     let mut hasher = Sha256::new();
-    hasher.update(n.to_ne_bytes());
+    hasher.update((n as u64).to_ne_bytes());
     let result = hasher.finalize();
     let data: &[u8] = result[..16].try_into().unwrap();
     bs58::encode(data).into_string().try_into().unwrap()
