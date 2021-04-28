@@ -1,4 +1,4 @@
-// TypeScript bindings generated with near-ts v0.2.14 https://github.com/epam/near-syn
+// TypeScript bindings generated with near-ts v0.2.15 https://github.com/epam/near-syn
 
 // Exports common NEAR Rust SDK types
 export type U64 = string;
@@ -619,6 +619,10 @@ export interface NonFungibleTokenEnumeration {
      */
     nft_tokens_for_owner(args: { account_id: ValidAccountId, from_index: U64|null, limit: number|null }): Promise<Token[]>;
 
+    /**
+     */
+    nft_token_uri(args: { token_id: TokenId }): Promise<string|null>;
+
 }
 
 /**
@@ -645,6 +649,7 @@ export const NftContractMethods = {
         "nft_tokens",
         "nft_supply_for_owner",
         "nft_tokens_for_owner",
+        "nft_token_uri",
     ],
     changeMethods: [
         "create_collectible",
