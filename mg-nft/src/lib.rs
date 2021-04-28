@@ -100,6 +100,8 @@ pub enum Panic {
     GateIdAlreadyExists { gate_id: GateId },
     #[panic_msg = "Gate ID `{}` must have a positive supply"]
     ZeroSupplyNotAllowed { gate_id: GateId },
+    #[panic_msg = "Invalid argument for gate ID `{}`: {}"]
+    InvalidArgument { gate_id: GateId, reason: String },
     #[panic_msg = "Gate ID `{}` was not found"]
     GateIdNotFound { gate_id: GateId },
     #[panic_msg = "Tokens for gate id `{}` have already been claimed"]
@@ -199,8 +201,7 @@ impl NftContract {
         gate_id: ValidGateId,
         title: String,
         description: String,
-        supply: U64,
-        gate_url: String,
+        supply: u16,
         royalty: Fraction,
     ) {
         let gate_id = gate_id.to_string();
@@ -220,8 +221,12 @@ impl NftContract {
         if self.collectibles.get(&gate_id).is_some() {
             Panic::GateIdAlreadyExists { gate_id }.panic();
         }
-        if supply.0 == 0 {
+        if supply == 0 {
             Panic::ZeroSupplyNotAllowed { gate_id }.panic();
+        }
+        if title.len() > 140 {
+            Panic::InvalidArgument { gate_id, reason: "Title exceeds 140 chars".to_string() }
+                .panic();
         }
 
         // if env::predecessor_account_id() != admin_id {
@@ -234,7 +239,6 @@ impl NftContract {
             gate_id,
             creator_id,
             current_supply: supply,
-            gate_url,
             minted_tokens: Vec::new(),
             royalty,
             metadata: TokenMetadata {
@@ -341,7 +345,7 @@ impl NftContract {
         match self.collectibles.get(&gate_id) {
             None => Panic::GateIdNotFound { gate_id }.panic(),
             Some(mut collectible) => {
-                if collectible.current_supply.0 == 0 {
+                if collectible.current_supply == 0 {
                     Panic::GateIdExhausted { gate_id }.panic()
                 }
 
@@ -355,13 +359,12 @@ impl NftContract {
                     owner_id,
                     created_at: now,
                     modified_at: now,
-                    sender_id: "".to_string(),
                     approvals: HashMap::new(),
                     approval_counter: U64::from(0),
                 };
                 self.insert_token(&token);
 
-                collectible.current_supply.0 = collectible.current_supply.0 - 1;
+                collectible.current_supply = collectible.current_supply - 1;
                 collectible.minted_tokens.push(U64(token_id));
                 self.collectibles.insert(&gate_id, &collectible);
 
@@ -382,7 +385,7 @@ impl NftContract {
                 self.delete_token_from(token_id, &owner_id);
 
                 if let Some(copies) = collectible.metadata.copies {
-                    collectible.metadata.copies = Some(U64(copies.0 - 1));
+                    collectible.metadata.copies = Some(copies - 1);
                 }
 
                 let mut i = 0;
@@ -529,7 +532,6 @@ impl NonFungibleTokenCore for NftContract {
         self.delete_token_from(token_id, &token.owner_id);
 
         token.owner_id = receiver_id.as_ref().to_string();
-        token.sender_id = sender_id;
         token.modified_at = env::block_timestamp();
         token.approvals.clear();
         self.insert_token(&token);
@@ -759,6 +761,13 @@ impl NonFungibleTokenEnumeration for NftContract {
                 result
             }
         }
+    }
+
+    fn nft_token_uri(&self, token_id: TokenId) -> Option<String> {
+        self.metadata
+            .base_uri
+            .clone()
+            .and_then(|uri| self.tokens.get(&token_id).map(|t| uri + t.gate_id.as_str()))
     }
 }
 

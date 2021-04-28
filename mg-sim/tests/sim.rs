@@ -137,7 +137,7 @@ pub fn create_collectible(
     nft: &ContractAccount<NftContract>,
     user: &UserAccount,
     gate_id: ValidGateId,
-    supply: u64,
+    supply: u16,
     royalty: &str,
 ) -> Result<(), String> {
     println!(
@@ -151,15 +151,13 @@ pub fn create_collectible(
 
     let title = lipsum::lipsum(2);
     let description = lipsum::lipsum(10);
-    let url = lipsum::lipsum(5);
     match tx(call!(
         user,
         nft.create_collectible(
             gate_id.clone(),
             title.to_string(),
             description.to_string(),
-            U64::from(supply),
-            url.to_string(),
+            supply,
             royalty.parse().unwrap()
         ),
         0,
@@ -171,8 +169,7 @@ pub fn create_collectible(
             assert_eq!(collectible.gate_id, gate_id.to_string());
             assert_eq!(collectible.metadata.title.unwrap(), title.to_string());
             assert_eq!(collectible.metadata.description.unwrap(), description.to_string());
-            assert_eq!(collectible.current_supply, U64(supply));
-            assert_eq!(collectible.gate_url, url.to_string());
+            assert_eq!(collectible.current_supply, supply);
             assert_eq!(collectible.royalty, royalty.parse().unwrap());
             println!(" [OK]");
             Ok(())
@@ -192,7 +189,7 @@ pub fn get_collectible_by_gate_id(
 pub fn claim_token(
     nft: &ContractAccount<NftContract>,
     user: &UserAccount,
-    gate_key: u64,
+    gate_key: u16,
 ) -> Result<TokenId, String> {
     let gate_id = gate_id(gate_key);
     println!("[{}] `{}` claiming token for `{}`", nft.account_id(), user.account_id, gate_id,);

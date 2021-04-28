@@ -43,7 +43,7 @@ impl DerefMut for NftContractChecker {
 }
 
 impl MockedContext<NftContractChecker> {
-    fn create_collectible(&mut self, gate_id: ValidGateId, supply: u64, royalty: &str) {
+    fn create_collectible(&mut self, gate_id: ValidGateId, supply: u16, royalty: &str) {
         let collectibles_by_owner = self.get_collectibles_by_creator(self.pred_id());
 
         println!("Creating Collectible `{}` with supply {}", gate_id, supply);
@@ -51,14 +51,13 @@ impl MockedContext<NftContractChecker> {
             gate_id.clone(),
             "My collectible".to_string(),
             "NFT description".to_string(),
-            U64::from(supply),
-            "someurl".to_string(),
+            supply,
             royalty.parse().unwrap(),
         );
 
         let collectible = self.contract.get_collectible_by_gate_id(gate_id.clone()).unwrap();
         assert_eq!(&collectible.gate_id, gate_id.as_ref());
-        assert_eq!(collectible.current_supply.0, supply);
+        assert_eq!(collectible.current_supply, supply);
 
         assert_eq!(
             self.get_collectibles_by_creator(self.pred_id()).len(),
@@ -66,11 +65,11 @@ impl MockedContext<NftContractChecker> {
         );
     }
 
-    fn create_test_collectible(&mut self, gate_id: ValidGateId, supply: u64) {
+    fn create_test_collectible(&mut self, gate_id: ValidGateId, supply: u16) {
         self.create_collectible(gate_id, supply, "5/100");
     }
 
-    fn create_royalty_collectible(&mut self, gate_id: ValidGateId, supply: u64, royalty: &str) {
+    fn create_royalty_collectible(&mut self, gate_id: ValidGateId, supply: u16, royalty: &str) {
         self.create_collectible(gate_id, supply, royalty);
     }
 
@@ -373,7 +372,7 @@ mod claim_token {
                 assert_eq!(tokens.len(), 3);
 
                 let c = contract.get_collectible_by_gate_id(gate_id(1)).unwrap();
-                assert_eq!(c.current_supply.0, 7);
+                assert_eq!(c.current_supply, 7);
             });
     }
 
@@ -434,13 +433,13 @@ mod burn_token {
             let token_id = contract.claim_token(gate_id(1));
             contract.burn_token(token_id);
             let collectible = contract.get_collectible_by_gate_id(gate_id(1)).unwrap();
-            assert_eq!(collectible.metadata.copies.unwrap(), U64(9));
+            assert_eq!(collectible.metadata.copies.unwrap(), 9);
 
             let token_id = contract.claim_token(gate_id(1));
             contract.nft_approve(token_id, bob(), approve_msg(10));
             contract.burn_token(token_id);
             let collectible = contract.get_collectible_by_gate_id(gate_id(1)).unwrap();
-            assert_eq!(collectible.metadata.copies.unwrap(), U64(8));
+            assert_eq!(collectible.metadata.copies.unwrap(), 8);
         });
     }
 

@@ -275,8 +275,7 @@ pub fn crypto_hash(value: &String) -> CryptoHash {
 pub struct Collectible {
     pub gate_id: GateId,
     pub creator_id: AccountId,
-    pub current_supply: U64,
-    pub gate_url: String,
+    pub current_supply: u16,
     pub minted_tokens: Vec<TokenId>,
     pub royalty: Fraction,
     pub metadata: TokenMetadata,
@@ -299,9 +298,6 @@ pub struct Token {
     /// Represents when this `Token` was last modified, in nanoseconds.
     /// Either when created or transferred.
     pub modified_at: u64,
-    /// If this `Token` was transferred, this field holds the previous owner.
-    /// Otherwise is empty.
-    pub sender_id: AccountId,
     /// Holds the list of accounts that can `transfer_token`s on behalf of the token's owner.
     /// It is mapped to the approval id and minimum amount that this token should be transfer for.
     pub approvals: HashMap<AccountId, TokenApproval>,
@@ -319,7 +315,7 @@ pub struct TokenMetadata {
     pub description: Option<String>, // free-form description
     pub media: Option<String>, // URL to associated media, preferably to decentralized, content-addressed storage
     pub media_hash: Option<String>, // Base64-encoded sha256 hash of content referenced by the `media` field. Required if `media` is included.
-    pub copies: Option<U64>, // number of copies of this set of metadata in existence when token was minted.
+    pub copies: Option<u16>, // number of copies of this set of metadata in existence when token was minted.
     pub issued_at: Option<Timestamp>, // ISO 8601 datetime when token was issued or minted
     pub expires_at: Option<Timestamp>, // ISO 8601 datetime when token expires
     pub starts_at: Option<Timestamp>, // ISO 8601 datetime when token starts being valid
@@ -440,19 +436,24 @@ pub mod nep178 {
 /// <https://nomicon.io/Standards/NonFungibleToken/Enumeration.html>
 pub mod nep181 {
 
-    use super::Token;
+    use super::{Token, TokenId};
     use near_sdk::json_types::{ValidAccountId, U64};
 
     pub trait NonFungibleTokenEnumeration {
         fn nft_total_supply(&self) -> U64;
+
         fn nft_tokens(&self, from_index: Option<U64>, limit: Option<u32>) -> Vec<Token>;
+
         fn nft_supply_for_owner(&self, account_id: ValidAccountId) -> U64;
+
         fn nft_tokens_for_owner(
             &self,
             account_id: ValidAccountId,
             from_index: Option<U64>,
             limit: Option<u32>,
         ) -> Vec<Token>;
+
+        fn nft_token_uri(&self, token_id: TokenId) -> Option<String>;
     }
 }
 

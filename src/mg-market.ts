@@ -133,11 +133,7 @@ export interface Collectible {
 
     /**
      */
-    current_supply: U64;
-
-    /**
-     */
-    gate_url: string;
+    current_supply: number;
 
     /**
      */
@@ -185,12 +181,6 @@ export interface Token {
     modified_at: number;
 
     /**
-     *  If this `Token` was transferred, this field holds the previous owner.
-     *  Otherwise is empty.
-     */
-    sender_id: AccountId;
-
-    /**
      *  Holds the list of accounts that can `transfer_token`s on behalf of the token's owner.
      *  It is mapped to the approval id and minimum amount that this token should be transfer for.
      */
@@ -226,7 +216,7 @@ export interface TokenMetadata {
 
     /**
      */
-    copies: U64|null;
+    copies: number|null;
 
     /**
      */

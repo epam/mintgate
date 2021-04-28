@@ -186,7 +186,7 @@ mod nft_on_approve {
             let ids = [alice(), bob(), charlie()];
             for token_id in 1..12 {
                 contract.nft_on_approve(
-                    token_id.into(),
+                    U64(token_id as u64),
                     ids[token_id as usize % 3].clone(),
                     0.into(),
                     approve_msg((token_id * 10).into(), gate_id(token_id % 4), bob()),

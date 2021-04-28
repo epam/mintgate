@@ -133,11 +133,7 @@ export interface Collectible {
 
     /**
      */
-    current_supply: U64;
-
-    /**
-     */
-    gate_url: string;
+    current_supply: number;
 
     /**
      */
@@ -185,12 +181,6 @@ export interface Token {
     modified_at: number;
 
     /**
-     *  If this `Token` was transferred, this field holds the previous owner.
-     *  Otherwise is empty.
-     */
-    sender_id: AccountId;
-
-    /**
      *  Holds the list of accounts that can `transfer_token`s on behalf of the token's owner.
      *  It is mapped to the approval id and minimum amount that this token should be transfer for.
      */
@@ -226,7 +216,7 @@ export interface TokenMetadata {
 
     /**
      */
-    copies: U64|null;
+    copies: number|null;
 
     /**
      */
@@ -379,6 +369,10 @@ export enum Panic {
 
     /**
      */
+    InvalidArgument,
+
+    /**
+     */
     GateIdNotFound,
 
     /**
@@ -468,7 +462,7 @@ export interface Self0 {
      * 
      *  See <https://github.com/epam/mintgate/issues/3>.
      */
-    create_collectible(args: { gate_id: ValidGateId, title: string, description: string, supply: U64, gate_url: string, royalty: Fraction }, gas?: any): Promise<void>;
+    create_collectible(args: { gate_id: ValidGateId, title: string, description: string, supply: number, royalty: Fraction }, gas?: any): Promise<void>;
 
     /**
      *  Returns the `Collectible` with the given `gate_id`.
@@ -563,7 +557,6 @@ export interface NonFungibleTokenCore {
     nft_transfer_payout(args: { receiver_id: ValidAccountId, token_id: TokenId, approval_id: U64|null, memo: string|null, balance: U128|null }, gas?: any): Promise<Payout|null>;
 
     /**
-     *  Returns the total token supply.
      *  Returns the token identified by `token_id`.
      *  Or `null` if the `token_id` was not found.
      * 
@@ -608,6 +601,28 @@ export interface NonFungibleTokenApprovalMgmt {
 
 /**
  */
+export interface NonFungibleTokenEnumeration {
+    /**
+     *  Returns the total token supply.
+     */
+    nft_total_supply(): Promise<U64>;
+
+    /**
+     */
+    nft_tokens(args: { from_index: U64|null, limit: number|null }): Promise<Token[]>;
+
+    /**
+     */
+    nft_supply_for_owner(args: { account_id: ValidAccountId }): Promise<U64>;
+
+    /**
+     */
+    nft_tokens_for_owner(args: { account_id: ValidAccountId, from_index: U64|null, limit: number|null }): Promise<Token[]>;
+
+}
+
+/**
+ */
 export interface Self1 {
     /**
      */
@@ -615,7 +630,7 @@ export interface Self1 {
 
 }
 
-export type NftContract = Self0 & NonFungibleTokenCore & NonFungibleTokenMetadata & NonFungibleTokenApprovalMgmt & Self1;
+export type NftContract = Self0 & NonFungibleTokenCore & NonFungibleTokenMetadata & NonFungibleTokenApprovalMgmt & NonFungibleTokenEnumeration & Self1;
 
 export const NftContractMethods = {
     viewMethods: [
@@ -626,6 +641,10 @@ export const NftContractMethods = {
         "nft_payout",
         "nft_token",
         "nft_metadata",
+        "nft_total_supply",
+        "nft_tokens",
+        "nft_supply_for_owner",
+        "nft_tokens_for_owner",
     ],
     changeMethods: [
         "create_collectible",
