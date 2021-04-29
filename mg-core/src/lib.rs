@@ -278,11 +278,18 @@ pub fn crypto_hash(value: &String) -> CryptoHash {
 #[cfg_attr(not(target_arch = "wasm"), derive(PartialEq, Debug))]
 #[serde(crate = "near_sdk::serde")]
 pub struct Collectible {
+    /// The unique identifier of this `Collectible`.
     pub gate_id: GateId,
+    /// The account id that created this `Collectible`.
     pub creator_id: AccountId,
+    /// Indicates how many `Token`s can be minted out of this `Collectible`.
     pub current_supply: u16,
+    /// The list of `TokenId`s actually minted out of this `Collectible`.
     pub minted_tokens: Vec<TokenId>,
+    /// Indicates the royalty as percentage (in NEARs) to be paid to `creator_id`
+    /// every time a minted token out of this `Collectible` is reselled.
     pub royalty: Fraction,
+    /// Additional info provided by NEP-177
     pub metadata: Metadata,
 }
 

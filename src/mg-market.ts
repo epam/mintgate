@@ -129,26 +129,33 @@ export type Payout = Record<AccountId, U128>;
  */
 export interface Collectible {
     /**
+     *  The unique identifier of this `Collectible`.
      */
     gate_id: GateId;
 
     /**
+     *  The account id that created this `Collectible`.
      */
     creator_id: AccountId;
 
     /**
+     *  Indicates how many `Token`s can be minted out of this `Collectible`.
      */
     current_supply: number;
 
     /**
+     *  The list of `TokenId`s actually minted out of this `Collectible`.
      */
     minted_tokens: TokenId[];
 
     /**
+     *  Indicates the royalty as percentage (in NEARs) to be paid to `creator_id`
+     *  every time a minted token out of this `Collectible` is reselled.
      */
     royalty: Fraction;
 
     /**
+     *  Additional info provided by NEP-177
      */
     metadata: Metadata;
 
