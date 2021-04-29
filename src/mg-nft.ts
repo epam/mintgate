@@ -485,7 +485,7 @@ export type Panics = [TokenId, Panic][];
  *  Methods for the NFT contract.
  *  Methods belonging to a NEP Standard are implemented in their own interfaces.
  */
-export interface Self0 extends NonFungibleTokenCore {
+export interface Self0 {
     /**
      *  Initializes the contract.
      *  This contract methods needs to be explicitely called
