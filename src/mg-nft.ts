@@ -1,4 +1,4 @@
-// TypeScript bindings generated with near-ts v0.2.15 https://github.com/epam/near-syn
+// TypeScript bindings generated with near-ts v0.2.16 https://github.com/epam/near-syn
 
 // Exports common NEAR Rust SDK types
 export type U64 = string;
@@ -30,7 +30,7 @@ export enum CorePanics {
  *  As with usual fractions, `den`ominator cannot be `0`.
  *  Morever, `num` must be less or equal than `den`.
  */
-export interface Fraction {
+export type Fraction = {
     /**
      *  The *numerator* of this `Fraction`.
      */
@@ -127,7 +127,7 @@ export type Payout = Record<AccountId, U128>;
  *  `Token`s can be then minted from a given collectible.
  *  A collectible is identified by `gate_id`.
  */
-export interface Collectible {
+export type Collectible = {
     /**
      *  The unique identifier of this `Collectible`.
      */
@@ -164,7 +164,7 @@ export interface Collectible {
 /**
  *  Represents a copy made out of a given collectible.
  */
-export interface Token {
+export type Token = {
     /**
      *  The unique identifier for a `Token`.
      *  Any two different tokens, will have different `token_id`s,
@@ -219,7 +219,7 @@ export interface Token {
  *  Doc-comments for these fields were taken from:
  *  <https://nomicon.io/Standards/NonFungibleToken/Metadata.html#interface>
  */
-export interface Metadata {
+export type Metadata = {
     /**
      *  ex. "Arch Nemesis: Mail Carrier" or "Parcel #5055".
      */
@@ -288,7 +288,7 @@ export interface Metadata {
 /**
  *  Represents an individual approval by some marketplace account id.
  */
-export interface TokenApproval {
+export type TokenApproval = {
     /**
      *  Id used to avoid selling the same token more than once.
      */
@@ -307,7 +307,7 @@ export interface TokenApproval {
  *  Doc-comments for these fields were taken from:
  *  <https://nomicon.io/Standards/NonFungibleToken/Metadata.html#interface>
  */
-export interface NFTContractMetadata {
+export type NFTContractMetadata = {
     /**
      *  Required, essentially a version like "nft-1.0.0".
      */
@@ -352,7 +352,7 @@ export interface NFTContractMetadata {
  *  - The value of `msg` must be a valid JSON,
  *    that deserializes to this struct.
  */
-export interface NftApproveMsg {
+export type NftApproveMsg = {
     /**
      *  Indicates the minimum price (in NEARs) requested by owner to pay for the token.
      */
@@ -367,7 +367,7 @@ export interface NftApproveMsg {
  *  Additionally it is augmented with `gate_id` and `creator_id`
  *  so the Marketplace can lookup by this fields.
  */
-export interface MarketApproveMsg {
+export type MarketApproveMsg = {
     /**
      *  Indicates the minimum price (in NEARs) that an account must pay to buy a token.
      */
@@ -485,7 +485,7 @@ export type Panics = [TokenId, Panic][];
  *  Methods for the NFT contract.
  *  Methods belonging to a NEP Standard are implemented in their own interfaces.
  */
-export interface Self0 {
+export interface NftContract {
     /**
      *  Initializes the contract.
      *  This contract methods needs to be explicitely called
@@ -713,7 +713,7 @@ export interface NonFungibleTokenEnumeration {
 
 }
 
-export type NftContract = Self0 & NonFungibleTokenCore & NonFungibleTokenMetadata & NonFungibleTokenApprovalMgmt & NonFungibleTokenEnumeration;
+export interface NftContract extends NonFungibleTokenCore, NonFungibleTokenMetadata, NonFungibleTokenApprovalMgmt, NonFungibleTokenEnumeration {}
 
 export const NftContractMethods = {
     viewMethods: [
