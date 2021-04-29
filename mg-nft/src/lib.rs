@@ -27,8 +27,7 @@ use mg_core::{
     nep177::{NFTContractMetadata, NonFungibleTokenMetadata},
     nep178::NonFungibleTokenApprovalMgmt,
     nep181::NonFungibleTokenEnumeration,
-    Collectible, MarketApproveMsg, NftApproveMsg, Payout, Token, TokenApproval, TokenId,
-    TokenMetadata,
+    Collectible, MarketApproveMsg, Metadata, NftApproveMsg, Payout, Token, TokenApproval, TokenId,
 };
 use near_env::{near_ext, near_log, PanicMessage};
 use near_sdk::{
@@ -229,11 +228,8 @@ impl NftContract {
                 .panic();
         }
 
-        // if env::predecessor_account_id() != admin_id {
-        //     panic();
-        // }
-
         let creator_id = env::predecessor_account_id();
+        let now = env::block_timestamp();
 
         let collectible = Collectible {
             gate_id,
@@ -241,15 +237,15 @@ impl NftContract {
             current_supply: supply,
             minted_tokens: Vec::new(),
             royalty,
-            metadata: TokenMetadata {
+            metadata: Metadata {
                 title: Some(title),
                 description: Some(description),
                 media: None,
                 media_hash: None,
                 copies: Some(supply),
-                issued_at: None,
+                issued_at: Some(now),
                 expires_at: None,
-                starts_at: None,
+                starts_at: Some(now),
                 updated_at: None,
                 extra: None,
                 reference: None,
@@ -361,6 +357,7 @@ impl NftContract {
                     modified_at: now,
                     approvals: HashMap::new(),
                     approval_counter: U64::from(0),
+                    metadata: Metadata::default(),
                 };
                 self.insert_token(&token);
 
@@ -375,7 +372,7 @@ impl NftContract {
 
     /// Burns token
     pub fn burn_token(&mut self, token_id: TokenId) {
-        let token = self.get_token(token_id);
+        let token = self.get_token_or_panic(token_id);
         let gate_id = token.gate_id;
 
         match self.collectibles.get(&gate_id) {
@@ -447,15 +444,30 @@ impl NftContract {
         }
     }
 
+    /// Gets
+    pub fn get_token_by_id(&self, token_id: TokenId) -> Option<Token> {
+        self.get_token(token_id)
+    }
+
+    /// Gets the `Token` with given `token_id`.
+    fn get_token(&self, token_id: TokenId) -> Option<Token> {
+        match self.tokens.get(&token_id) {
+            None => None,
+            Some(mut token) => {
+                assert!(token.token_id == token_id);
+                let collectible = self.collectibles.get(&token.gate_id).expect("Gate id not found");
+                token.metadata = collectible.metadata;
+                Some(token)
+            }
+        }
+    }
+
     /// Gets the `Token` with given `token_id`.
     /// Panics otherwise.
-    fn get_token(&self, token_id: TokenId) -> Token {
-        match self.tokens.get(&token_id) {
+    fn get_token_or_panic(&self, token_id: TokenId) -> Token {
+        match self.get_token(token_id) {
             None => Panic::TokenIdNotFound { token_id }.panic(),
-            Some(token) => {
-                assert!(token.token_id == token_id);
-                token
-            }
+            Some(token) => token,
         }
     }
 
@@ -505,7 +517,7 @@ impl NonFungibleTokenCore for NftContract {
         memo: Option<String>,
     ) {
         let sender_id = env::predecessor_account_id();
-        let mut token = self.get_token(token_id);
+        let mut token = self.get_token_or_panic(token_id);
 
         if sender_id != token.owner_id && token.approvals.get(&sender_id).is_none() {
             Panic::SenderNotAuthToTransfer { sender_id }.panic();
@@ -554,7 +566,7 @@ impl NonFungibleTokenCore for NftContract {
     /// This is part of an ongoing (yet not settled) NEP spec:
     /// <https://github.com/thor314/NEPs/blob/patch-5/specs/Standards/NonFungibleToken/payouts.md>
     fn nft_payout(&self, token_id: TokenId, balance: U128) -> Payout {
-        let token = self.get_token(token_id);
+        let token = self.get_token_or_panic(token_id);
         match self.collectibles.get(&token.gate_id) {
             None => Panic::GateIdNotFound { gate_id: token.gate_id }.panic(),
             Some(collectible) => {
@@ -638,7 +650,7 @@ impl NonFungibleTokenApprovalMgmt for NftContract {
         };
 
         let owner_id = env::predecessor_account_id();
-        let mut token = self.get_token(token_id);
+        let mut token = self.get_token_or_panic(token_id);
         if &owner_id != &token.owner_id {
             Panic::TokenIdNotOwnedBy { token_id, owner_id }.panic();
         }
@@ -677,7 +689,7 @@ impl NonFungibleTokenApprovalMgmt for NftContract {
     /// Revokes approval for `token_id` from `account_id`.
     fn nft_revoke(&mut self, token_id: TokenId, account_id: ValidAccountId) -> Promise {
         let owner_id = env::predecessor_account_id();
-        let mut token = self.get_token(token_id);
+        let mut token = self.get_token_or_panic(token_id);
         if &owner_id != &token.owner_id {
             Panic::TokenIdNotOwnedBy { token_id, owner_id }.panic();
         }
@@ -691,7 +703,7 @@ impl NonFungibleTokenApprovalMgmt for NftContract {
     /// Revokes all approval for `token_id`.
     fn nft_revoke_all(&mut self, token_id: TokenId) {
         let owner_id = env::predecessor_account_id();
-        let mut token = self.get_token(token_id);
+        let mut token = self.get_token_or_panic(token_id);
         if &owner_id != &token.owner_id {
             Panic::TokenIdNotOwnedBy { token_id, owner_id }.panic();
         }

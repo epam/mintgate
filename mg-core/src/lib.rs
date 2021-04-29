@@ -15,11 +15,14 @@ use near_sdk::{
 };
 use std::collections::HashMap;
 
+/// The errors thrown by *mg-core*.
 #[derive(Serialize, PanicMessage)]
 #[serde(crate = "near_sdk::serde", tag = "err")]
 pub enum CorePanics {
+    /// Thrown when a denominator in a `Fraction` is `0`.
     #[panic_msg = "Denominator must be a positive number, but was 0"]
     ZeroDenominatorFraction,
+    /// Thrown when a `Fraction` is more than `1`.
     #[panic_msg = "The fraction must be less or equal to 1"]
     FractionGreaterThanOne,
 }
@@ -253,9 +256,8 @@ pub mod gate {
 pub type TokenId = U64;
 
 /// Unix epoch, expressed in miliseconds.
-/// Note that 64 bits `number`s cannot be represented in JavaScript.
-/// Therefore, this type cannot be used in public interfaces.
-/// Only for internal `struct`s.
+/// Note that 64 bits `number`s cannot be represented in JavaScript,
+/// thus maximum number allowed is `2^53`.
 pub type Timestamp = u64;
 
 /// Mapping from `AccountId`s to balance (in NEARs).
@@ -269,6 +271,9 @@ pub fn crypto_hash(value: &String) -> CryptoHash {
     hash
 }
 
+/// A `Collectible` represents something of value.
+/// `Token`s can be then minted from a given collectible.
+/// A collectible is identified by `gate_id`.
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
 #[cfg_attr(not(target_arch = "wasm"), derive(PartialEq, Debug))]
 #[serde(crate = "near_sdk::serde")]
@@ -278,7 +283,7 @@ pub struct Collectible {
     pub current_supply: u16,
     pub minted_tokens: Vec<TokenId>,
     pub royalty: Fraction,
-    pub metadata: TokenMetadata,
+    pub metadata: Metadata,
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize)]
@@ -303,14 +308,17 @@ pub struct Token {
     pub approvals: HashMap<AccountId, TokenApproval>,
     /// Counter to assign next approval ID.
     pub approval_counter: U64,
+
+    #[borsh_skip]
+    pub metadata: Metadata,
 }
 
 /// Associated metadata with a `GateId` as defined by
 /// https://github.com/near/NEPs/discussions/177
-#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Default)]
 #[cfg_attr(not(target_arch = "wasm"), derive(PartialEq, Debug))]
 #[serde(crate = "near_sdk::serde")]
-pub struct TokenMetadata {
+pub struct Metadata {
     pub title: Option<String>, // ex. "Arch Nemesis: Mail Carrier" or "Parcel #5055"
     pub description: Option<String>, // free-form description
     pub media: Option<String>, // URL to associated media, preferably to decentralized, content-addressed storage
