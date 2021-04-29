@@ -9,13 +9,16 @@ export type AccountId = string;
 export type ValidAccountId = string;
 
 /**
+ *  The errors thrown by *mg-core*.
  */
 export enum CorePanics {
     /**
+     *  Thrown when a denominator in a `Fraction` is `0`.
      */
     ZeroDenominatorFraction,
 
     /**
+     *  Thrown when a `Fraction` is more than `1`.
      */
     FractionGreaterThanOne,
 
@@ -108,9 +111,8 @@ export type TokenId = U64;
 
 /**
  *  Unix epoch, expressed in miliseconds.
- *  Note that 64 bits `number`s cannot be represented in JavaScript.
- *  Therefore, this type cannot be used in public interfaces.
- *  Only for internal `struct`s.
+ *  Note that 64 bits `number`s cannot be represented in JavaScript,
+ *  thus maximum number allowed is `2^53`.
  */
 export type Timestamp = number;
 
@@ -121,6 +123,9 @@ export type Timestamp = number;
 export type Payout = Record<AccountId, U128>;
 
 /**
+ *  A `Collectible` represents something of value.
+ *  `Token`s can be then minted from a given collectible.
+ *  A collectible is identified by `gate_id`.
  */
 export interface Collectible {
     /**
@@ -145,7 +150,7 @@ export interface Collectible {
 
     /**
      */
-    metadata: TokenMetadata;
+    metadata: Metadata;
 
 }
 
@@ -191,13 +196,17 @@ export interface Token {
      */
     approval_counter: U64;
 
+    /**
+     */
+    metadata: Metadata;
+
 }
 
 /**
  *  Associated metadata with a `GateId` as defined by
  *  https://github.com/near/NEPs/discussions/177
  */
-export interface TokenMetadata {
+export interface Metadata {
     /**
      */
     title: string|null;
