@@ -308,10 +308,10 @@ pub struct Token {
     pub owner_id: AccountId,
     /// Represents when this `Token` was minted, in nanoseconds.
     /// Once this `Token` is minted, this field remains unchanged.
-    pub created_at: u64,
+    pub created_at: Timestamp,
     /// Represents when this `Token` was last modified, in nanoseconds.
     /// Either when created or transferred.
-    pub modified_at: u64,
+    pub modified_at: Timestamp,
     /// Holds the list of accounts that can `transfer_token`s on behalf of the token's owner.
     /// It is mapped to the approval id and minimum amount that this token should be transfer for.
     pub approvals: HashMap<AccountId, TokenApproval>,
@@ -343,15 +343,15 @@ pub struct Metadata {
     pub media_hash: Option<String>,
     /// Number of copies of this set of metadata in existence when token was minted.
     pub copies: Option<u16>,
-    /// ISO 8601 datetime when token was issued or minted.
+    /// UNIX epoch datetime (in miliseconds) when token was issued or minted.
     pub issued_at: Option<Timestamp>,
-    /// ISO 8601 datetime when token expires.
+    /// UNIX epoch datetime (in miliseconds) when token expires.
     pub expires_at: Option<Timestamp>,
-    /// ISO 8601 datetime when token starts being valid.
+    /// UNIX epoch datetime (in miliseconds) when token starts being valid.
     pub starts_at: Option<Timestamp>,
-    /// ISO 8601 datetime when token was last updated.
+    /// UNIX epoch datetime (in miliseconds) when token was last updated.
     pub updated_at: Option<Timestamp>,
-    /// anything extra the NFT wants to store on-chain.
+    /// Anything extra the NFT wants to store on-chain.
     /// It can be stringified JSON.
     pub extra: Option<String>,
     /// URL to an off-chain JSON file with more info.
@@ -457,7 +457,7 @@ pub mod nep177 {
 }
 
 /// Non-Fungible Token Approval Management (NEP-178) v1.0.0
-/// 
+///
 /// <https://nomicon.io/Standards/NonFungibleToken/ApprovalManagement.html>
 pub mod nep178 {
 
