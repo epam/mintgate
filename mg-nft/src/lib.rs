@@ -205,6 +205,10 @@ impl NftContract {
         description: String,
         supply: u16,
         royalty: Fraction,
+        media: Option<String>,
+        media_hash: Option<String>,
+        reference: Option<String>,
+        reference_hash: Option<String>,
     ) {
         let gate_id = gate_id.to_string();
 
@@ -230,9 +234,36 @@ impl NftContract {
             Panic::InvalidArgument { gate_id, reason: "Title exceeds 140 chars".to_string() }
                 .panic();
         }
+        if description.len() > 1024 {
+            Panic::InvalidArgument {
+                gate_id,
+                reason: "`description` exceeds 1024 chars".to_string(),
+            }
+            .panic();
+        }
+
+        macro_rules! check {
+            ($arg:ident) => {{
+                if let Some(val) = &$arg {
+                    if val.len() > 1024 {
+                        Panic::InvalidArgument {
+                            gate_id,
+                            reason: concat!("`", stringify!($arg), "` exceeds 1024 chars")
+                                .to_string(),
+                        }
+                        .panic();
+                    }
+                }
+            }};
+        }
+
+        check!(media);
+        check!(media_hash);
+        check!(reference);
+        check!(reference_hash);
 
         let creator_id = env::predecessor_account_id();
-        let now = env::block_timestamp();
+        let now = env::block_timestamp() / 1_000_000;
 
         let collectible = Collectible {
             gate_id,
@@ -243,16 +274,16 @@ impl NftContract {
             metadata: Metadata {
                 title: Some(title),
                 description: Some(description),
-                media: None,
-                media_hash: None,
+                media,
+                media_hash,
                 copies: Some(supply),
                 issued_at: Some(now),
                 expires_at: None,
                 starts_at: Some(now),
                 updated_at: None,
                 extra: None,
-                reference: None,
-                reference_hash: None,
+                reference,
+                reference_hash,
             },
         };
         self.collectibles.insert(&collectible.gate_id, &collectible);
@@ -349,7 +380,7 @@ impl NftContract {
                 }
 
                 let owner_id = env::predecessor_account_id();
-                let now = env::block_timestamp();
+                let now = env::block_timestamp() / 1_000_000;
 
                 let token_id = self.tokens.len();
                 let token = Token {
@@ -625,7 +656,7 @@ impl NonFungibleTokenCore for NftContract {
         self.delete_token_from(token_id, &token.owner_id);
 
         token.owner_id = receiver_id.as_ref().to_string();
-        token.modified_at = env::block_timestamp();
+        token.modified_at = env::block_timestamp() / 1_000_000;
         token.approvals.clear();
         self.insert_token(&token);
     }
