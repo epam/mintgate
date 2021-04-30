@@ -56,10 +56,10 @@ impl MockedContext<NftContractChecker> {
             "NFT description".to_string(),
             supply,
             royalty,
-            None,
-            None,
-            None,
-            None,
+            Some("media".to_string()),
+            Some("123".to_string()),
+            Some("ref".to_string()),
+            Some("456".to_string()),
         );
 
         let collectible = self.contract.get_collectible_by_gate_id(gate_id.clone()).unwrap();
@@ -68,6 +68,10 @@ impl MockedContext<NftContractChecker> {
         assert_eq!(collectible.current_supply, supply);
         assert_eq!(collectible.minted_tokens.len(), 0);
         assert_eq!(collectible.royalty, royalty);
+        assert_eq!(collectible.metadata.media, Some("media".to_string()));
+        assert_eq!(collectible.metadata.media_hash, Some("123".to_string()));
+        assert_eq!(collectible.metadata.reference, Some("ref".to_string()));
+        assert_eq!(collectible.metadata.reference_hash, Some("456".to_string()));
 
         assert_eq!(
             self.get_collectibles_by_creator(self.pred_id()).len(),
