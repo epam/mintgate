@@ -436,7 +436,12 @@ impl NftContract {
                 self.collectibles.insert(&gate_id, &collectible);
 
                 for (market_id, _) in &token.approvals {
-                    mg_core::market::nft_on_revoke(token_id, market_id, 0, env::prepaid_gas() / 2);
+                    mg_core::nep178::market::nft_on_revoke(
+                        token_id,
+                        market_id,
+                        0,
+                        env::prepaid_gas() / 2,
+                    );
                 }
             }
         }
@@ -558,7 +563,7 @@ impl NftContract {
                 Err(err) => errs.push((token_id, err)),
             }
         }
-        mg_core::market::batch_on_approve(
+        mg_core::nep178::market::batch_on_approve(
             oks,
             owner_id.try_into().unwrap(),
             account_id.as_ref(),
@@ -791,7 +796,7 @@ impl NonFungibleTokenApprovalMgmt for NftContract {
                     gate_id: Some(token.gate_id.try_into().unwrap()),
                     creator_id: Some(collectible.creator_id),
                 };
-                mg_core::market::nft_on_approve(
+                mg_core::nep178::market::nft_on_approve(
                     token_id,
                     owner_id.try_into().unwrap(),
                     U64::from(token.approval_counter),
@@ -815,7 +820,12 @@ impl NonFungibleTokenApprovalMgmt for NftContract {
             Panic::RevokeApprovalFailed { account_id: account_id.to_string() }.panic();
         }
         self.tokens.insert(&token_id, &token);
-        mg_core::market::nft_on_revoke(token_id, account_id.as_ref(), 0, env::prepaid_gas() / 2)
+        mg_core::nep178::market::nft_on_revoke(
+            token_id,
+            account_id.as_ref(),
+            0,
+            env::prepaid_gas() / 2,
+        )
     }
 
     /// Revokes all approval for `token_id`.
@@ -826,7 +836,7 @@ impl NonFungibleTokenApprovalMgmt for NftContract {
             Panic::TokenIdNotOwnedBy { token_id, owner_id }.panic();
         }
         for (nft_id, _) in &token.approvals {
-            mg_core::market::nft_on_revoke(token_id, nft_id, 0, env::prepaid_gas() / 2);
+            mg_core::nep178::market::nft_on_revoke(token_id, nft_id, 0, env::prepaid_gas() / 2);
         }
 
         token.approvals.clear();

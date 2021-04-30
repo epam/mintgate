@@ -432,27 +432,34 @@ export type TokenForSale = {
 }
 
 /**
+ *  The error variants thrown by *mg-market*.
  */
 export enum Panics {
     /**
+     *  Thrown when `nft_on_approve` does not find `min_price`.
      */
     MsgFormatMinPriceMissing,
 
     /**
+     *  Thrown when the `token_key` was not found.
      */
     TokenKeyNotFound,
 
     /**
+     *  Thrown when buyer attempts to buy own token.
      */
     BuyOwnTokenNotAllowed,
 
     /**
+     *  Thrown when deposit is not enough to buy a token.
      */
     NotEnoughDepositToBuyToken,
 
 }
 
 /**
+ *  Methods for the Marketplace contract.
+ *  Methods belonging to a `trait` are implemented in their own interfaces.
  */
 export interface MarketContract {
     /**
@@ -486,7 +493,7 @@ export interface MarketContract {
      * 
      *  The caller must attach at least `min_price` NEARs in order to pay for the given token.
      *  Moreover, the owner cannot buy his/her own tokens.
-     *  
+     * 
      *  When the token is sold,
      *  royalties are paid by this marketplace according to `nft_contract_id::nft_transfer_payout`.
      */
@@ -495,6 +502,8 @@ export interface MarketContract {
 }
 
 /**
+ *  This interface defines methods to be called
+ *  when approval or removal happened in a NFT contract.
  */
 export interface NonFungibleTokenApprovalsReceiver {
     /**

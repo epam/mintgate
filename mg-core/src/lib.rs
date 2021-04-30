@@ -5,11 +5,11 @@ pub mod mocked_context;
 
 use fraction::Fraction;
 use gate::{GateId, ValidGateId};
-use near_env::{near_ext, PanicMessage};
+use near_env::PanicMessage;
 use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
-    env, ext_contract,
-    json_types::{ValidAccountId, U128, U64},
+    env,
+    json_types::{U128, U64},
     serde::{Deserialize, Serialize},
     AccountId, CryptoHash,
 };
@@ -461,8 +461,13 @@ pub mod nep177 {
 /// <https://nomicon.io/Standards/NonFungibleToken/ApprovalManagement.html>
 pub mod nep178 {
 
-    use super::TokenId;
-    use near_sdk::{json_types::ValidAccountId, Promise};
+    use super::{MarketApproveMsg, TokenId};
+    use near_env::near_ext;
+    use near_sdk::{
+        ext_contract,
+        json_types::{ValidAccountId, U64},
+        Promise,
+    };
 
     pub trait NonFungibleTokenApprovalMgmt {
         fn nft_approve(
@@ -475,6 +480,28 @@ pub mod nep178 {
         fn nft_revoke(&mut self, token_id: TokenId, account_id: ValidAccountId) -> Promise;
 
         fn nft_revoke_all(&mut self, token_id: TokenId);
+    }
+
+    /// This interface defines methods to be called
+    /// when approval or removal happened in a NFT contract.
+    #[near_ext]
+    #[ext_contract(market)]
+    pub trait NonFungibleTokenApprovalsReceiver {
+        fn nft_on_approve(
+            &mut self,
+            token_id: TokenId,
+            owner_id: ValidAccountId,
+            approval_id: U64,
+            msg: String,
+        );
+
+        fn batch_on_approve(
+            &mut self,
+            tokens: Vec<(TokenId, MarketApproveMsg)>,
+            owner_id: ValidAccountId,
+        );
+
+        fn nft_on_revoke(&mut self, token_id: TokenId);
     }
 }
 
@@ -530,24 +557,4 @@ pub struct MarketApproveMsg {
     pub gate_id: Option<ValidGateId>,
     /// Represents the `creator_id` of the collectible of the token being approved if present.
     pub creator_id: Option<AccountId>,
-}
-
-#[near_ext]
-#[ext_contract(market)]
-pub trait NonFungibleTokenApprovalsReceiver {
-    fn nft_on_approve(
-        &mut self,
-        token_id: TokenId,
-        owner_id: ValidAccountId,
-        approval_id: U64,
-        msg: String,
-    );
-
-    fn batch_on_approve(
-        &mut self,
-        tokens: Vec<(TokenId, MarketApproveMsg)>,
-        owner_id: ValidAccountId,
-    );
-
-    fn nft_on_revoke(&mut self, token_id: TokenId);
 }

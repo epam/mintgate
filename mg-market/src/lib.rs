@@ -9,7 +9,8 @@ use std::{
 use mg_core::{
     crypto_hash,
     gate::{GateId, ValidGateId},
-    MarketApproveMsg, NonFungibleTokenApprovalsReceiver, Payout, TokenId,
+    nep178::NonFungibleTokenApprovalsReceiver,
+    MarketApproveMsg, Payout, TokenId,
 };
 use near_env::{near_ext, near_log, PanicMessage};
 use near_sdk::{
@@ -88,19 +89,26 @@ enum Keys {
     TokensByCreatorIdValue(CryptoHash),
 }
 
+/// The error variants thrown by *mg-market*.
 #[derive(Serialize, PanicMessage)]
 #[serde(crate = "near_sdk::serde", tag = "err")]
 pub enum Panics {
+    /// Thrown when `nft_on_approve` does not find `min_price`.
     #[panic_msg = "Could not find min_price in msg: {}"]
     MsgFormatMinPriceMissing { reason: String },
+    /// Thrown when the `token_key` was not found.
     #[panic_msg = "Token Key `{}` was not found"]
     TokenKeyNotFound { token_key: TokenKey },
+    /// Thrown when buyer attempts to buy own token.
     #[panic_msg = "Buyer cannot buy own token"]
     BuyOwnTokenNotAllowed,
+    /// Thrown when deposit is not enough to buy a token.
     #[panic_msg = "Not enough deposit to cover token minimum price"]
     NotEnoughDepositToBuyToken,
 }
 
+/// Methods for the Marketplace contract.
+/// Methods belonging to a `trait` are implemented in their own interfaces.
 #[near_log(skip_args, only_pub)]
 #[near_bindgen]
 impl MarketContract {
@@ -145,7 +153,7 @@ impl MarketContract {
     ///
     /// The caller must attach at least `min_price` NEARs in order to pay for the given token.
     /// Moreover, the owner cannot buy his/her own tokens.
-    /// 
+    ///
     /// When the token is sold,
     /// royalties are paid by this marketplace according to `nft_contract_id::nft_transfer_payout`.
     #[payable]
@@ -238,6 +246,8 @@ impl SelfCallback for MarketContract {
     }
 }
 
+/// This interface defines methods to be called
+/// when approval or removal happened in a NFT contract.
 #[near_log(skip_args, only_pub)]
 #[near_bindgen]
 impl NonFungibleTokenApprovalsReceiver for MarketContract {
