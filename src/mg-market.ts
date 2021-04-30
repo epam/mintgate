@@ -186,13 +186,13 @@ export type Token = {
      *  Represents when this `Token` was minted, in nanoseconds.
      *  Once this `Token` is minted, this field remains unchanged.
      */
-    created_at: number;
+    created_at: Timestamp;
 
     /**
      *  Represents when this `Token` was last modified, in nanoseconds.
      *  Either when created or transferred.
      */
-    modified_at: number;
+    modified_at: Timestamp;
 
     /**
      *  Holds the list of accounts that can `transfer_token`s on behalf of the token's owner.
@@ -247,27 +247,27 @@ export type Metadata = {
     copies: number|null;
 
     /**
-     *  ISO 8601 datetime when token was issued or minted.
+     *  UNIX epoch datetime (in miliseconds) when token was issued or minted.
      */
     issued_at: Timestamp|null;
 
     /**
-     *  ISO 8601 datetime when token expires.
+     *  UNIX epoch datetime (in miliseconds) when token expires.
      */
     expires_at: Timestamp|null;
 
     /**
-     *  ISO 8601 datetime when token starts being valid.
+     *  UNIX epoch datetime (in miliseconds) when token starts being valid.
      */
     starts_at: Timestamp|null;
 
     /**
-     *  ISO 8601 datetime when token was last updated.
+     *  UNIX epoch datetime (in miliseconds) when token was last updated.
      */
     updated_at: Timestamp|null;
 
     /**
-     *  anything extra the NFT wants to store on-chain.
+     *  Anything extra the NFT wants to store on-chain.
      *  It can be stringified JSON.
      */
     extra: string|null;
@@ -482,9 +482,15 @@ export interface MarketContract {
     get_tokens_by_creator_id(args: { creator_id: ValidAccountId }): Promise<TokenForSale[]>;
 
     /**
-     *  Buys the token.
+     *  Indicates that `predecessor_account_id` wants to buy the token `nft_contract_id:token_id`.
+     * 
+     *  The caller must attach at least `min_price` NEARs in order to pay for the given token.
+     *  Moreover, the owner cannot buy his/her own tokens.
+     *  
+     *  When the token is sold,
+     *  royalties are paid by this marketplace according to `nft_contract_id::nft_transfer_payout`.
      */
-    buy_token(args: { nft_id: ValidAccountId, token_id: TokenId }, gas?: any, amount?: any): Promise<void>;
+    buy_token(args: { nft_contract_id: ValidAccountId, token_id: TokenId }, gas?: any, amount?: any): Promise<void>;
 
 }
 

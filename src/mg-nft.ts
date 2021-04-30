@@ -186,13 +186,13 @@ export type Token = {
      *  Represents when this `Token` was minted, in nanoseconds.
      *  Once this `Token` is minted, this field remains unchanged.
      */
-    created_at: number;
+    created_at: Timestamp;
 
     /**
      *  Represents when this `Token` was last modified, in nanoseconds.
      *  Either when created or transferred.
      */
-    modified_at: number;
+    modified_at: Timestamp;
 
     /**
      *  Holds the list of accounts that can `transfer_token`s on behalf of the token's owner.
@@ -247,27 +247,27 @@ export type Metadata = {
     copies: number|null;
 
     /**
-     *  ISO 8601 datetime when token was issued or minted.
+     *  UNIX epoch datetime (in miliseconds) when token was issued or minted.
      */
     issued_at: Timestamp|null;
 
     /**
-     *  ISO 8601 datetime when token expires.
+     *  UNIX epoch datetime (in miliseconds) when token expires.
      */
     expires_at: Timestamp|null;
 
     /**
-     *  ISO 8601 datetime when token starts being valid.
+     *  UNIX epoch datetime (in miliseconds) when token starts being valid.
      */
     starts_at: Timestamp|null;
 
     /**
-     *  ISO 8601 datetime when token was last updated.
+     *  UNIX epoch datetime (in miliseconds) when token was last updated.
      */
     updated_at: Timestamp|null;
 
     /**
-     *  anything extra the NFT wants to store on-chain.
+     *  Anything extra the NFT wants to store on-chain.
      *  It can be stringified JSON.
      */
     extra: string|null;
@@ -510,7 +510,7 @@ export interface NftContract {
      * 
      *  See <https://github.com/epam/mintgate/issues/3>.
      */
-    create_collectible(args: { gate_id: ValidGateId, title: string, description: string, supply: number, royalty: Fraction }, gas?: any): Promise<void>;
+    create_collectible(args: { gate_id: ValidGateId, title: string, description: string, supply: number, royalty: Fraction, media: string|null, media_hash: string|null, reference: string|null, reference_hash: string|null }, gas?: any): Promise<void>;
 
     /**
      *  Returns the `Collectible` with the given `gate_id`.
